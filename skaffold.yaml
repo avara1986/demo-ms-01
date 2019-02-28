@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/avara1986/demo-ms-01:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/avara1986/demo-ms-01:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: demo-ms-01
+        chartPath: charts/demo-ms-01
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/avara1986/demo-ms-01'
+          image.tag: '{{.DIGEST_HEX}}'
